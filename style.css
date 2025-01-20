@@ -1,0 +1,98 @@
+:root {
+	--text-color: #f0f0f9;
+	--primary-background: #111121;
+	--primary: #3c3eb4;
+	--secondary: #22236d;
+	--accent: #2b2c97;
+}
+
+* {
+	padding: 0 !important;
+	margin: 0 !important;
+}
+
+body {
+	background-color: var(--primary-background);
+	color: var(--text-color);
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	height: 100vh;
+	font-size: 20px;
+}
+
+input,select,button{
+	border-radius: 5px;
+	outline:none;
+	border:2px solid transparent;
+	width: 350px !important;
+	font-size: 20px;
+	margin:10px !important;
+	padding: 7px !important;
+	box-sizing: border-box;
+	background-color: var(--primary-background);
+	color:var(--text-color)
+}
+
+input:focus,select:focus{
+	border:2px solid var(--text-color);
+}
+
+button:hover{
+	background-color: #101010;
+}
+
+dialog{
+	border: none;
+	outline: none;
+	color:var(--text-color);
+	background-color: var(--secondary);
+	padding: 50px !important;
+}
+
+.game {
+	font-size: 30px;
+	font-weight: 700;
+	height: 300px;
+	width: 300px;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-around;
+}
+.row {
+	flex: 1;
+	display: flex;
+	flex-direction: row;
+	justify-content: space-around;
+}
+
+.row div {
+	flex: 1;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+.row2 {
+	border: 5px solid;
+	border-left: none;
+	border-right: none;
+}
+
+.row > div:nth-child(2) {
+	border: 5px solid;
+	border-top: none;
+	border-bottom: none;
+}
+
+.hidden{
+	display: none;
+}
+
+.block{
+	display: block;
+}
+
+dialog{
+	position: inherit;
+}
