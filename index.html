@@ -4,57 +4,217 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Odin Tic Tac Toe Game</title>
-  <link rel="stylesheet" href="style.css">
+  <title>Tic Tac Toe</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f4f9;
+    }
+
+    h1 {
+      margin-top: 20px;
+      color: #333;
+    }
+
+    .game-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 20px;
+    }
+
+    .game-board {
+      display: grid;
+      grid-template-columns: repeat(3, 100px);
+      grid-template-rows: repeat(3, 100px);
+      gap: 5px;
+    }
+
+    .cell {
+      width: 100px;
+      height: 100px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: #fff;
+      border: 2px solid #ccc;
+      font-size: 2rem;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .cell.taken {
+      pointer-events: none;
+    }
+
+    .controls {
+      margin-top: 20px;
+    }
+
+    .controls input {
+      padding: 10px;
+      margin: 5px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    .controls button {
+      padding: 10px 15px;
+      margin: 5px;
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .controls button:hover {
+      background-color: #0056b3;
+    }
+
+    .message {
+      margin-top: 20px;
+      font-size: 1.2rem;
+      color: #555;
+    }
+  </style>
 </head>
 
 <body>
-  <div class="game hidden" id="main">
-
-    <div class="row row1">
-      <div class="square " data-num="1"></div>
-      <div class="square " data-num="2"></div>
-      <div class="square " data-num="3"></div>
+  <h1>Tic Tac Toe</h1>
+  <div class="game-container">
+    <div class="controls">
+      <input type="text" id="player1" placeholder="Player 1 Name">
+      <input type="text" id="player2" placeholder="Player 2 Name">
+      <button id="startGame">Start Game</button>
+      <button id="restartGame">Restart Game</button>
     </div>
-    <div class="row row2">
-      <div class="square " data-num="4"></div>
-      <div class="square " data-num="5"></div>
-      <div class="square " data-num="6"></div>
-    </div>
-    <div class="row row3">
-      <div class="square " data-num="7"></div>
-      <div class="square " data-num="8"></div>
-      <div class="square " data-num="9"></div>
-    </div>
+    <div class="game-board" id="gameBoard"></div>
+    <div class="message" id="message"></div>
   </div>
+  <!-- <script>
+    const Gameboard = (() => {
+      const board = Array(9).fill(null);
 
-  <dialog open id="dialog">
-    <label for="player1">
-      Enter Player 1 Name : <br>
-      <input type="text" id="player1" placeholder="golam">
-    </label>
-    <br>
-    <label for="player2">
-      Enter Player 2 Name : <br>
-      <input type="text" id="player2" placeholder="abdul">
-    </label>
-    <br>
-    <label for="first-move">Choose First Move : <br>
+      const setCell = (index, marker) => {
+        if (!board[index]) {
+          board[index] = marker;
+          return true;
+        }
+        return false;
+      };
 
-      <select id="first-move">
-        <option value="" disabled>--Please choose an option--</option>
-        <option value="X">X</option>
-        <option value="O">O</option>
+      const getBoard = () => board;
 
+      const resetBoard = () => {
+        for (let i = 0; i < board.length; i++) {
+          board[i] = null;
+        }
+      };
 
-      </select>
-    </label>
-    <br>
-    <button id="btn">Enter Game</button>
-  </dialog>
+      return {setCell, getBoard, resetBoard};
+    })();
 
+    const Player = (name, marker) => {
+      return {name, marker};
+    };
+
+    const GameController = (() => {
+      let players = [];
+      let currentPlayerIndex = 0;
+      let gameOver = false;
+
+      const startGame = (player1Name, player2Name) => {
+        players = [Player(player1Name, 'X'), Player(player2Name, 'O')];
+        currentPlayerIndex = 0;
+        gameOver = false;
+        Gameboard.resetBoard();
+        DisplayController.renderBoard();
+        DisplayController.setMessage(`${players[0].name}'s turn (X)`);
+      };
+
+      const switchPlayer = () => {
+        currentPlayerIndex = 1 - currentPlayerIndex;
+        return players[currentPlayerIndex];
+      };
+
+      const handleClick = (index) => {
+        if (gameOver || !Gameboard.setCell(index, players[currentPlayerIndex].marker)) {
+          return;
+        }
+        DisplayController.renderBoard();
+        if (checkWinner(players[currentPlayerIndex].marker)) {
+          gameOver = true;
+          DisplayController.setMessage(`${players[currentPlayerIndex].name} wins!`);
+        } else if (isTie()) {
+          gameOver = true;
+          DisplayController.setMessage(`It's a tie!`);
+        } else {
+          const nextPlayer = switchPlayer();
+          DisplayController.setMessage(`${nextPlayer.name}'s turn (${nextPlayer.marker})`);
+        }
+      };
+
+      const checkWinner = (marker) => {
+        const winningCombinations = [
+          [0, 1, 2], [3, 4, 5], [6, 7, 8], // Rows
+          [0, 3, 6], [1, 4, 7], [2, 5, 8], // Columns
+          [0, 4, 8], [2, 4, 6]            // Diagonals
+        ];
+
+        return winningCombinations.some(combination =>
+          combination.every(index => Gameboard.getBoard()[index] === marker)
+        );
+      };
+
+      const isTie = () => {
+        return Gameboard.getBoard().every(cell => cell !== null);
+      };
+
+      return {startGame, handleClick};
+    })();
+
+    const DisplayController = (() => {
+      const gameBoardElement = document.getElementById('gameBoard');
+      const messageElement = document.getElementById('message');
+
+      const renderBoard = () => {
+        gameBoardElement.innerHTML = '';
+        Gameboard.getBoard().forEach((cell, index) => {
+          const cellElement = document.createElement('div');
+          cellElement.classList.add('cell');
+          if (cell) {
+            cellElement.textContent = cell;
+            cellElement.classList.add('taken');
+          }
+          cellElement.addEventListener('click', () => GameController.handleClick(index));
+          gameBoardElement.appendChild(cellElement);
+        });
+      };
+
+      const setMessage = (message) => {
+        messageElement.textContent = message;
+      };
+
+      return {renderBoard, setMessage};
+    })();
+
+    document.getElementById('startGame').addEventListener('click', () => {
+      const player1Name = document.getElementById('player1').value || 'Player 1';
+      const player2Name = document.getElementById('player2').value || 'Player 2';
+      GameController.startGame(player1Name, player2Name);
+    });
+
+    document.getElementById('restartGame').addEventListener('click', () => {
+      location.reload();
+    });
+  </script> -->
+
+  <script src="./script.js"></script>
 </body>
 
-<script src="./script.js"></script>
 
 </html>

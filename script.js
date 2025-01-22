@@ -1,64 +1,117 @@
-let p1name, p2name, currentMove;
-let data = {};
+const Gameboard = (() => {
+  const board = Array(9).fill(null);
 
-document.getElementById("btn").onclick = () => {
-    p1name = document.getElementById("player1").value || "Player 1";
-    p2name = document.getElementById("player2").value || "Player 2";
-
-    currentMove = document.getElementById("first-move").value;
-
-    document.getElementById("main").classList.remove("hidden");
-    document.getElementById("dialog").classList.add("hidden");
-};
-
-function checkWinner() {
-    // Winning combinations (indexing starts from 1)
-    const winningCombinations = [
-        [1, 2, 3], // top row
-        [4, 5, 6], // middle row
-        [7, 8, 9], // bottom row
-        [1, 4, 7], // first column
-        [2, 5, 8], // second column
-        [3, 6, 9], // third column
-        [1, 5, 9], // diagonal from top-left to bottom-right
-        [3, 5, 7], // diagonal from top-right to bottom-left
-    ];
-
-    // Check each winning combination
-    for (let combination of winningCombinations) {
-        const [a, b, c] = combination;
-
-        if (data[a] && data[a] === data[b] && data[a] === data[c]) {
-            alert(`${data[a]} wins!`);
-            return true; // Stop checking if there's a winner
-        }
+  const setCell = (index, marker) => {
+    if (!board[index]) {
+      board[index] = marker;
+      return true;
     }
     return false;
-}
+  };
 
-function addMove(number) {
-    return function (number) {
-        // Check if the square is already taken
-        if (!(number in data)) {
-            // Store the current move in the data object
-            data[number] = currentMove;
+  const getBoard = () => board;
 
-            // Update the UI with the current move
-            document.querySelector(`[data-num="${number}"]`).innerText = currentMove;
+  const resetBoard = () => board.fill(null);
 
-            // Check if someone won after this move
-            if (checkWinner()) return;
+  return { setCell, getBoard, resetBoard };
+})();
 
-            // Switch the current player (X or O)
-            currentMove = (currentMove === "X") ? "O" : "X";
-        }
-    };
-}
+const Player = (name, marker) => {
+  return { name, marker };
+};
 
-const moveHandeler = addMove();
+const GameController = (() => {
+  let players = [];
+  let currentPlayerIndex = 0;
+  let gameOver = false;
 
-document.querySelectorAll(".square").forEach((item) => {
-    item.addEventListener("click", () => {
-        moveHandeler(item.getAttribute("data-num"));
-    });
+  const switchPlayer = () => {
+    currentPlayerIndex = 1 - currentPlayerIndex;
+    return players[currentPlayerIndex];
+  };
+
+  const handleClick = (index) => {
+    if (gameOver || !Gameboard.setCell(index, players[currentPlayerIndex].marker)) {
+      return;
+    }
+
+    DisplayController.renderBoard();
+
+    if (checkWinner(players[currentPlayerIndex].marker)) {
+      gameOver = true;
+      DisplayController.setMessage(`${players[currentPlayerIndex].name} wins!`);
+    } else if (isTie()) {
+      gameOver = true;
+      DisplayController.setMessage(`It's a tie!`);
+    } else {
+      const nextPlayer = switchPlayer();
+      DisplayController.setMessage(`${nextPlayer.name}'s turn (${nextPlayer.marker})`);
+    }
+  };
+
+  const checkWinner = (marker) => {
+    const winningCombinations = [
+      [0, 1, 2], [3, 4, 5], [6, 7, 8], // Rows
+      [0, 3, 6], [1, 4, 7], [2, 5, 8], // Columns
+      [0, 4, 8], [2, 4, 6]            // Diagonals
+    ];
+
+    return winningCombinations.some(combination =>
+      combination.every(index => Gameboard.getBoard()[index] === marker)
+    );
+  };
+
+  const isTie = () => {
+    return Gameboard.getBoard().every(cell => cell !== null);
+  };
+
+  const startGame = (player1name, player2name) => {
+    players = [Player(player1name, "X"), Player(player2name, "O")];
+    currentPlayerIndex = 0;
+    gameOver = false;
+    Gameboard.resetBoard();
+    DisplayController.renderBoard();
+    DisplayController.setMessage(`${players[0].name}'s turn (X)`);
+  };
+
+  return { startGame, handleClick };
+})();
+
+const DisplayController = (() => {
+  const gameBoardElement = document.getElementById('gameBoard');
+  const messageElement = document.getElementById('message');
+
+  const renderBoard = () => {
+    gameBoardElement.innerHTML = '';
+
+    Gameboard.getBoard().forEach((cell, index) => {
+      const cellElement = document.createElement('div');
+      cellElement.classList.add("cell");
+      if (cell) {
+        cellElement.textContent = cell;
+        cellElement.classList.add("taken")
+      }
+      cellElement.addEventListener('click', () => GameController.handleClick(index));
+      gameBoardElement.appendChild(cellElement);
+    })
+  }
+
+  const setMessage = (message) => {
+    messageElement.textContent = message;
+  };
+  return { renderBoard, setMessage };
+})();
+
+
+document.getElementById('startGame').addEventListener('click', () => {
+  const player1Name = document.getElementById('player1').value || 'Player 1';
+  const player2Name = document.getElementById('player2').value || 'Player 2';
+  GameController.startGame(player1Name, player2Name);
+});
+
+document.getElementById('restartGame').addEventListener('click', () => {
+  // window.location.reload()
+  Gameboard.resetBoard();
+  DisplayController.renderBoard()
+  
 });
