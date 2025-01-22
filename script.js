@@ -113,5 +113,5 @@ document.getElementById('restartGame').addEventListener('click', () => {
   // window.location.reload()
   Gameboard.resetBoard();
   DisplayController.renderBoard()
-  
+  //
 });
